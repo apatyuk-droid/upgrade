@@ -83,7 +83,7 @@ h1{font-size:clamp(25px,7.4vw,34px);font-weight:800;letter-spacing:-.01em;color:
     <div id="final" hidden>
       <p class="ok">Релиз успешно собран ✓</p>
       <p class="combo" id="combo"></p>
-      <p class="wish" id="wish"><span class="emo"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f37e/512.webp" alt="🍾" width="34" height="34" onerror="this.parentNode.classList.add('fb');this.remove()"><i>🍾</i></span><span><b>Мила, поздравляем!</b> Пусть всё задуманное работает с первого запуска, а счастье никогда не требует перезагрузки</span></p>
+      <p class="wish" id="wish"><span class="emo"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f37e/512.webp" alt="🍾" width="34" height="34" onerror="this.parentNode.classList.add('fb');this.remove()"><i>🍾</i></span><span id="wishText"></span></p>
     </div>
   </div>
   <div class="actions" id="actions" hidden>
@@ -149,11 +149,32 @@ var COLS = [
 ];
 var ICONS = {"crown": "<path d=\"M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.29l4.27-3.66a.5.5 0 0 1 .8.52l-2.83 10.24a1 1 0 0 1-.96.74H5.81a1 1 0 0 1-.96-.74L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.66a1 1 0 0 0 1.52-.29z\"/><path d=\"M5 21h14\"/>", "gift": "<rect x=\"3\" y=\"8\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M12 8v13\"/><path d=\"M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7\"/><path d=\"M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5\"/>", "spark": "<path d=\"M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.13 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/>"};
 var WISHES = [
-  "Поздравляем! Пусть всё задуманное работает с первого запуска, а счастье никогда не требует перезагрузки.",
-  "Поздравляем! Пусть год пройдёт без багов, а все хорошие новости приходят без задержек.",
-  "Поздравляем! Пусть планы собираются с первой попытки, а радость обновляется автоматически.",
-  "Поздравляем! Пусть удача всегда будет в продакшене, а грусть — только в архиве."
+ "Мила, с днём рождения! Желаем, чтобы все планы сходились с первого коммита, дедлайны были только у задач, а у отдыха не было никогда.",
+ "Мила, от души поздравляем с днём рождения! Желаем сил на всё задуманное, интересных проектов и людей рядом, которые разделяют твои идеи.",
+ "Мила, с днём рождения! Пусть в этом году будет много путешествий — новых городов, дорог и впечатлений, которые хочется пересказывать снова и снова.",
+ "Мила, поздравляем! Желаем уютных осенних вечеров, горячего чая, любимых книг и тех, с кем тепло даже в самую непогоду.",
+ "Мила, с днём рождения! Пусть рядом всегда будут близкие люди, а дома ждут любовь, смех и спокойствие.",
+ "Мила, с днём рождения! Пусть мечты сбываются быстрее, чем ты успеваешь их загадывать, а самые смелые — в первую очередь.",
+ "Мила, поздравляем! Пусть торт будет вкусным, подарки — желанными, а сегодняшний день запомнится как один из самых счастливых.",
+ "Мила, с праздником! Пусть жизнь дарит яркие эмоции, неожиданные встречи и много счастья.",
+ "Мила, поздравляем! Пусть новый год жизни будет как хорошее кино — с интересным сюжетом, красивыми кадрами и счастливым финалом каждой истории."
 ];
+var wishBag = [], lastWish = -1;
+function nextWish() {
+  if (!wishBag.length) {
+    wishBag = WISHES.map(function (_, i) { return i; });
+    for (var i = wishBag.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = wishBag[i]; wishBag[i] = wishBag[j]; wishBag[j] = t; }
+    if (wishBag[wishBag.length - 1] === lastWish) { wishBag.unshift(wishBag.pop()); }
+  }
+  lastWish = wishBag.pop();
+  return WISHES[lastWish];
+}
+function renderWish(t) {
+  var k = t.indexOf("!") + 1, el = document.getElementById("wishText");
+  el.innerHTML = "";
+  var b = document.createElement("b"); b.textContent = t.slice(0, k); el.appendChild(b);
+  el.appendChild(document.createTextNode(t.slice(k)));
+}
 
 var tg = window.Telegram && Telegram.WebApp;
 if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor("#1d1517"); tg.setBackgroundColor("#121012"); } catch (e) {} }
@@ -205,6 +226,7 @@ var resBox = document.getElementById("result"), wait = document.getElementById("
 function update() {
   var all = reels.every(function (r) { return r.state === "done"; });
   if (all) {
+    renderWish(nextWish());
     document.getElementById("combo").textContent = reels.map(function (r) { return r.result; }).join(" + ");
     wait.hidden = true; fin.hidden = false; actions.hidden = false; resBox.classList.remove("idle");
     resBox.classList.remove("show"); void resBox.offsetWidth; resBox.classList.add("show");
