@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Твой персональный апгрейд</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#121012; --bg2:#1d1517;
+  --card:#0a090a; --line:rgba(242,42,48,.45);
+  --accent:#f22a30; --accent2:#ff4a4f; --btn:#f22a30;
+  --text:#ffffff; --muted:rgba(255,255,255,.66);
+  --panel:#f22a30;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);min-height:100%}
+body{font-family:Onest,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);
+  background:radial-gradient(120% 70% at 50% -10%,#3a1013 0%,var(--bg2) 42%,var(--bg) 100%) fixed;
+  padding:22px 12px 28px;min-height:100vh}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:640px;margin:0 auto}
+h1{font-size:clamp(25px,7.4vw,34px);font-weight:800;letter-spacing:-.01em;color:#fff;line-height:1.1}
+.sub{margin-top:10px;font-size:clamp(14px,3.9vw,17px);color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:20px}
+.head{text-align:center;font-size:clamp(11px,3.1vw,14px);font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;padding-bottom:8px}
+.card{position:relative;background:rgba(10,9,10,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;
+  min-height:clamp(132px,36vw,170px);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px 4px 22px;overflow:hidden}
+.card::after{content:"";position:absolute;left:10px;right:10px;bottom:16px;height:1.5px;background:rgba(255,255,255,.7);border-radius:2px}
+.stars{width:clamp(22px,6vw,28px);height:clamp(22px,6vw,28px);color:rgba(255,255,255,.35);margin-bottom:8px;transition:color .3s,transform .4s;flex:none}
+.card.done .stars{transform:scale(1.12)}
+.val{font-size:clamp(13px,3.7vw,21px);font-weight:700;text-align:center;line-height:1.25;min-height:2.5em;white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;hyphens:auto;overflow-wrap:anywhere;word-break:normal}
+.card.spin .val{animation:roll .09s linear;filter:blur(1.2px);opacity:.85}
+@keyframes roll{from{transform:translateY(-45%);opacity:0}to{transform:translateY(0)}}
+.card.land .val{animation:land .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes land{from{transform:translateY(-30%);filter:blur(2px);opacity:.3}to{transform:none;filter:none;opacity:1}}
+.card.done{border-color:var(--accent);box-shadow:0 0 0 1px rgba(242,42,48,.35),0 8px 26px rgba(242,42,48,.18)}
+.card.done .stars{color:var(--accent)}
+
+.btn{margin-top:8px;width:100%;height:clamp(42px,11vw,50px);border-radius:999px;border:1.5px solid var(--btn);
+  background:transparent;color:var(--btn);font:inherit;font-weight:700;font-size:clamp(13px,3.6vw,16px);letter-spacing:.06em;
+  text-transform:uppercase;cursor:pointer;transition:transform .12s,background .2s,color .2s}
+.btn:active{transform:scale(.96)}
+.btn:disabled{cursor:default;transform:none;border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.55);background:rgba(18,16,18,.45)}
+.btn.stop{background:var(--btn);color:#fff;box-shadow:0 6px 18px rgba(242,42,48,.35)}
+
+.result{margin-top:16px;background:linear-gradient(135deg,rgba(242,42,48,.14),rgba(242,42,48,.04));-webkit-backdrop-filter:blur(2.5px) saturate(130%);backdrop-filter:blur(2.5px) saturate(130%);border:1px solid rgba(255,90,95,.4);border-radius:16px;box-shadow:0 10px 34px rgba(242,42,48,.18),inset 0 1px 0 rgba(255,255,255,.12);padding:18px 16px 20px;
+  opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s;min-height:96px}
+.result.show{opacity:1;transform:none}
+.result .ok{color:#ff6a6e;font-weight:700;font-size:clamp(14px,3.9vw,17px)}
+.result .combo{margin-top:12px;font-weight:700;font-size:clamp(16px,4.6vw,20px);line-height:1.3}
+.result .wish{margin-top:12px;color:rgba(255,255,255,.88);font-size:clamp(14px,3.8vw,16px);line-height:1.45}
+.result.idle{background:rgba(29,23,25,.6);box-shadow:none;border:1px dashed rgba(242,42,48,.45);min-height:0}
+.result .wait{color:var(--muted);font-size:clamp(14px,3.8vw,16px);line-height:1.45}
+.actions{display:flex;gap:8px;margin-top:12px}
+.actions .btn{margin:0}
+.actions .btn.fill{background:var(--btn);color:#fff}
+.actions .btn:not(.fill){border-color:rgba(255,255,255,.5);color:#fff;background:rgba(18,16,18,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="wrap">
+  <h1>Твой персональный апгрейд</h1>
+  <p class="sub">Останови барабаны. Собери свой идеальный год.</p>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="result show idle" id="result">
+    <p class="wait" id="wait">Нажми «Стоп» под каждым барабаном — и узнай, что тебя ждёт.</p>
+    <div id="final" hidden>
+      <p class="ok">Релиз успешно собран ✓</p>
+      <p class="combo" id="combo"></p>
+      <p class="wish" id="wish"></p>
+    </div>
+  </div>
+  <div class="actions" id="actions" hidden>
+    <button class="btn" id="again">Собрать заново</button>
+    <button class="btn fill" id="share">Поделиться</button>
+  </div>
+</div>
+
+<script>
+
+(function () {
+  var c = document.getElementById("bg"), g = c.getContext("2d");
+  var CODE = ["const year = new Life();", "if (mood < 100) mood++;", "git push --force happiness", "while(true){ smile(); }",
+    "deploy --env=prod", "return dreams.map(fulfil);", "npm i luck", "// TODO: be happy", "0x2A 0xF2 0x30", "sudo upgrade --all",
+    "await joy.load();", "404: stress not found", "</> ", "{ status: 200 }", "01101100 01101111", "ping universe -t", "let bonus = true;"];
+  var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  function draw() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), W = innerWidth, H = Math.max(innerHeight, document.documentElement.scrollHeight);
+    c.style.height = innerHeight + "px"; c.width = W * dpr; c.height = innerHeight * dpr; H = innerHeight;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); seed = 7;
+    var step = 22;
+    // circuit traces
+    for (var n = 0; n < Math.round(W * H / 9000); n++) {
+      var x = Math.round(rnd() * W / step) * step, y = Math.round(rnd() * H / step) * step, red = rnd() < .28;
+      g.strokeStyle = red ? "rgba(242,42,48,.32)" : "rgba(255,255,255,.07)"; g.lineWidth = red ? 1.2 : 1;
+      g.beginPath(); g.moveTo(x, y);
+      var segs = 2 + Math.floor(rnd() * 4), dir = Math.floor(rnd() * 4);
+      for (var k = 0; k < segs; k++) {
+        var len = step * (1 + Math.floor(rnd() * 5));
+        if (k % 2) { x += (rnd() < .5 ? -1 : 1) * step; y += (dir % 2 ? 1 : -1) * step; }
+        else if (dir < 2) x += (dir ? 1 : -1) * len; else y += (dir == 3 ? 1 : -1) * len;
+        g.lineTo(x, y);
+      }
+      g.stroke();
+      g.fillStyle = red ? "rgba(242,42,48,.55)" : "rgba(255,255,255,.14)";
+      g.beginPath(); g.arc(x, y, red ? 2.4 : 2, 0, 7); g.fill();
+    }
+    // code fragments
+    g.font = "500 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    for (var m = 0; m < Math.round(W * H / 26000); m++) {
+      var red2 = rnd() < .22;
+      g.fillStyle = red2 ? "rgba(242,42,48,.30)" : "rgba(255,255,255,.075)";
+      g.fillText(CODE[Math.floor(rnd() * CODE.length)], rnd() * W - 30, rnd() * H);
+    }
+    // big brackets
+    g.font = "700 120px ui-monospace, Menlo, monospace"; g.fillStyle = "rgba(242,42,48,.06)";
+    g.fillText("{", W * .78, H * .3); g.fillText("</>", -20, H * .82);
+    // vignette
+    var v = g.createRadialGradient(W / 2, H * .35, 40, W / 2, H * .5, Math.max(W, H) * .8);
+    v.addColorStop(0, "rgba(18,16,18,0)"); v.addColorStop(1, "rgba(18,16,18,.75)");
+    g.fillStyle = v; g.fillRect(0, 0, W, H);
+  }
+  draw(); addEventListener("resize", draw);
+})();
+
+var COLS = [
+  { title: "Статус", icon: "crown", items: [
+    "Королева", "Легенда", "Икона", "Босс", "Богиня", "Гений", "Муза", "Суперзвезда", "Императрица", "Волшебница" ] },
+  { title: "Апгрейд", icon: "gift", items: [
+    "Миллионы", "Любовь", "Путешествия", "Свобода", "Роскошь", "Удача", "Приключения", "Вдохновение", "Счастье", "Восторг" ] },
+  { title: "Бонус", icon: "spark", items: [
+    "Безлимит", "Телепорт", "Автофикс", "Антистресс", "Кэшбэк", "Иммунитет", "Буст", "Джекпот", "Автопилот", "Респаун" ] }
+];
+var ICONS = {"crown": "<path d=\"M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.29l4.27-3.66a.5.5 0 0 1 .8.52l-2.83 10.24a1 1 0 0 1-.96.74H5.81a1 1 0 0 1-.96-.74L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.66a1 1 0 0 0 1.52-.29z\"/><path d=\"M5 21h14\"/>", "gift": "<rect x=\"3\" y=\"8\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M12 8v13\"/><path d=\"M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7\"/><path d=\"M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5\"/>", "spark": "<path d=\"M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.13 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/>"};
+var WISHES = [
+  "Поздравляем! Пусть всё задуманное работает с первого запуска, а счастье никогда не требует перезагрузки.",
+  "Поздравляем! Пусть год пройдёт без багов, а все хорошие новости приходят без задержек.",
+  "Поздравляем! Пусть планы собираются с первой попытки, а радость обновляется автоматически.",
+  "Поздравляем! Пусть удача всегда будет в продакшене, а грусть — только в архиве."
+];
+
+var tg = window.Telegram && Telegram.WebApp;
+if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor("#1d1517"); tg.setBackgroundColor("#121012"); } catch (e) {} }
+function haptic(t) { try { tg && tg.HapticFeedback && (t === "ok" ? tg.HapticFeedback.notificationOccurred("success") : tg.HapticFeedback.impactOccurred(t)); } catch (e) {} }
+
+var grid = document.getElementById("grid");
+var reels = COLS.map(function (c, i) {
+  var col = document.createElement("div");
+  col.innerHTML = '<div class="head">' + c.title + '</div>' +
+    '<div class="card"><svg class="stars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICONS[c.icon] + '</svg><div class="val"></div></div>' +
+    '<button class="btn"></button>';
+  grid.appendChild(col);
+  var r = { i: i, items: c.items, card: col.querySelector(".card"), val: col.querySelector(".val"), btn: col.querySelector(".btn"),
+            idx: Math.floor(Math.random() * c.items.length), timer: null, state: "idle", result: null };
+  r.btn.addEventListener("click", function () { if (r.state === "spin") stop(r); });
+  return r;
+});
+
+function show(r, cls) {
+  r.val.textContent = r.items[r.idx];
+  r.card.classList.remove("spin", "land"); void r.card.offsetWidth;
+  if (cls) r.card.classList.add(cls);
+}
+function start(r) {
+  clearTimeout(r.timer);
+  r.state = "spin"; r.result = null;
+  r.card.classList.remove("done");
+  r.btn.textContent = "Стоп"; r.btn.disabled = false; r.btn.classList.add("stop");
+  (function tick() { r.idx = (r.idx + 1) % r.items.length; show(r, "spin"); r.timer = setTimeout(tick, 85); })();
+  update();
+}
+function stop(r) {
+  clearTimeout(r.timer);
+  r.state = "stopping"; r.btn.textContent = "…"; r.btn.classList.remove("stop");
+  haptic("medium");
+  var steps = 4 + Math.floor(Math.random() * 6), d = 90;
+  (function slow() {
+    r.idx = (r.idx + 1) % r.items.length;
+    if (--steps > 0) { show(r, "spin"); d *= 1.18; r.timer = setTimeout(slow, d); return; }
+    show(r, "land");
+    r.state = "done"; r.result = r.items[r.idx];
+    r.card.classList.add("done");
+    r.btn.textContent = "Готово"; r.btn.disabled = true;
+    haptic("light");
+    update();
+  })();
+}
+var resBox = document.getElementById("result"), wait = document.getElementById("wait"), fin = document.getElementById("final"), actions = document.getElementById("actions");
+function update() {
+  var all = reels.every(function (r) { return r.state === "done"; });
+  if (all) {
+    document.getElementById("combo").textContent = reels.map(function (r) { return r.result; }).join(" + ");
+    document.getElementById("wish").textContent = WISHES[Math.floor(Math.random() * WISHES.length)];
+    wait.hidden = true; fin.hidden = false; actions.hidden = false; resBox.classList.remove("idle");
+    resBox.classList.remove("show"); void resBox.offsetWidth; resBox.classList.add("show");
+    haptic("ok");
+  } else {
+    wait.hidden = false; fin.hidden = true; actions.hidden = true; resBox.classList.add("idle");
+  }
+}
+document.getElementById("again").addEventListener("click", function () { reels.forEach(start); });
+document.getElementById("share").addEventListener("click", function () {
+  var text = "Мой персональный апгрейд на год: " + reels.map(function (r) { return r.result; }).join(" + ") + " ✨";
+  var url = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param !== undefined ? "" : location.href;
+  var link = "https://t.me/share/url?url=" + encodeURIComponent(url || location.href) + "&text=" + encodeURIComponent(text);
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(link); else window.open(link, "_blank");
+});
+function fitReels() {
+  reels.forEach(function (r) {
+    r.val.style.fontSize = ""; var keep = r.val.textContent, max = r.card.clientWidth - 12, fs = parseFloat(getComputedStyle(r.val).fontSize), w = 0;
+    r.items.forEach(function (t) { r.val.textContent = t; w = Math.max(w, r.val.scrollWidth); });
+    r.val.textContent = keep;
+    if (w > max) r.val.style.fontSize = (fs * max / w).toFixed(2) + "px";
+  });
+}
+window.addEventListener("resize", fitReels);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitReels);
+reels.forEach(function (r, k) { show(r); setTimeout(function () { start(r); }, 150 * k); });
+</script>
+</body>
+</html>
